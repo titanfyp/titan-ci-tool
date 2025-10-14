@@ -43,7 +43,7 @@ jobs:
             uses: actions/checkout@v4
 
          - name: Run TITAN Security Scan
-            uses: titan-fyp/titan-ci-tool@main
+            uses: titan-fyp/titan-ci-tool@<CHOSEN_VERSION>
             with:
                api_base_url: ${{ secrets.TITAN_API_BASE_URL }}
                report_format: 'pdf'
