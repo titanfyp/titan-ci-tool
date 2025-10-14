@@ -3,13 +3,13 @@
 This tool automates security scanning of your repository using the TITAN API with Server-Sent Events (SSE) for real-time progress updates. It connects to the TITAN chat endpoint to analyze your code and generate comprehensive security reports with enhanced reliability and timeout protection.
 
 ## How It Works
-- Connects to the TITAN SSE endpoint (`/chat?stream=true`) with your repository URL
+- Connects to the TITAN SSE endpoint (`/chat?stream=true`) with your repository URL and GitHub authentication token
 - Receives real-time progress updates via Server-Sent Events with enhanced error handling
 - Processes findings data directly from the SSE stream with timeout protection
 - Generates detailed security reports in multiple formats with improved content parsing
 - Provides configurable security policy enforcement with report preservation
 - Always generates reports as artifacts, even when builds fail due to policy violations
-- No API tokens required for authentication
+- Uses GitHub token authentication for secure repository access by the TITAN API
 
 ## Setup
 1. **Add the Tool to Your Repository**
@@ -17,6 +17,11 @@ This tool automates security scanning of your repository using the TITAN API wit
 
 2. **Configure Your API Settings**
    - Set up your API base URL as a GitHub secret or environment variable.
+
+3. **GitHub Token Authentication**
+   - The tool requires a GitHub token to allow the TITAN API to access your repository for analysis.
+   - Use `${{ secrets.GITHUB_TOKEN }}` which is automatically provided by GitHub Actions with read access to your repository.
+   - No manual configuration needed - GitHub Actions provides this token automatically.
 
 ## Publishing as a Reusable GitHub Action
 
@@ -46,6 +51,7 @@ jobs:
             uses: titan-fyp/titan-ci-tool@<CHOSEN_VERSION>
             with:
                api_base_url: ${{ secrets.TITAN_API_BASE_URL }}
+               github_token: ${{ secrets.GITHUB_TOKEN }}
                report_format: 'pdf'
                timeout_seconds: 300
                blocking: true
@@ -71,6 +77,7 @@ Replace `<your-org>/<your-repo>` with your actual GitHub organization and reposi
 
 ### Inputs
 - `api_base_url` (required): URL for the backend API
+- `github_token` (required): GitHub token for repository access. Use `${{ secrets.GITHUB_TOKEN }}` which is automatically provided by GitHub Actions
 - `report_format` (optional): The report output format type (md|pdf|xml). Default: md
 - `timeout_seconds` (optional): Timeout to call the API before failing (in seconds). Default: 300
 - `exclude_files` (optional): Comma-separated list of file patterns to exclude from scanning (glob)
@@ -91,7 +98,8 @@ Replace `<your-org>/<your-repo>` with your actual GitHub organization and reposi
 
 ## Customization
 - The tool connects to a single SSE endpoint: `/chat?stream=true` for real-time scan progress
-- Sends repository URL in the request body as `{"content": "github_url"}`
+- Sends repository URL and GitHub token in the request body as `{"content": "github_url", "github_token": "token"}`
+- The GitHub token is used by the TITAN API to securely access and analyze your repository
 - Processes findings data directly from SSE events with enhanced timeout protection (60 seconds)
 - **PDF generation** uses Go-based md2pdf for fast and reliable conversion
 - **Simple executable** single binary with no complex dependencies or setup
@@ -134,6 +142,7 @@ Replace `<your-org>/<your-repo>` with your actual GitHub organization and reposi
   uses: <your-org>/<your-repo>/titan-ci-tool@main
   with:
     api_base_url: ${{ secrets.TITAN_API_BASE_URL }}
+    github_token: ${{ secrets.GITHUB_TOKEN }}
     report_format: 'pdf'
     timeout_seconds: 600
     blocking: true
