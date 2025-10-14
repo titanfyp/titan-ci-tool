@@ -53,6 +53,12 @@ REPO_URL="https://github.com/${GITHUB_REPOSITORY}"
 
 echo "Repository URL: $REPO_URL"
 
+# Validate GitHub token is provided
+if [ -z "$GITHUB_TOKEN" ]; then
+  echo "Error: GITHUB_TOKEN environment variable is required."
+  exit 1
+fi
+
 # Construct SSE endpoint
 SSE_ENDPOINT="${API_BASE_URL%/}/chat?stream=true"
 
@@ -127,7 +133,7 @@ echo "0" > "/tmp/findings_count_$$"
 curl --max-time "$TIMEOUT_SECONDS" -X POST "$SSE_ENDPOINT" \
   -H "Content-Type: application/json" \
   -H "Accept: text/event-stream" \
-  --data "{\"content\": \"$REPO_URL\"}" \
+  --data "{\"content\": \"$REPO_URL\", \"github_token\": \"$GITHUB_TOKEN\"}" \
   -N --no-buffer 2>/dev/null | while IFS= read -r line; do
     
     # Mark activity

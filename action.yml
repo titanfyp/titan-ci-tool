@@ -5,6 +5,9 @@ inputs:
   api_base_url:
     description: 'URL for the backend API'
     required: true
+  github_token:
+    description: 'GitHub token for repository access'
+    required: true
   report_format:
     description: 'The report output format type (md|pdf|xml)'
     required: false
@@ -110,6 +113,7 @@ runs:
         ./entrypoint.sh
       env:
         API_BASE_URL: ${{ inputs.api_base_url }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
         REPORT_FORMAT: ${{ inputs.report_format }}
         TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
         EXCLUDE_FILES: ${{ inputs.exclude_files }}
