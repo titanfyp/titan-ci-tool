@@ -1,0 +1,118 @@
+name: 'Security Scan with TITAN Inference Model'
+description: 'Runs security scans calling inference model with customizable file exclusions'
+
+inputs:
+  api_base_url:
+    description: 'URL for the backend API'
+    required: true
+  report_format:
+    description: 'The report output format type (md|pdf|xml)'
+    required: false
+    default: 'md'
+  timeout_seconds:
+    description: 'Timeout to call the API before failing (in seconds)'
+    required: false
+    default: '300'
+  exclude_files:
+    description: 'Comma-separated list of file patterns to exclude from scanning (glob)'
+    required: false
+    default: ''
+  blocking:
+    description: 'Whether this step is blocking (fail on issues) or non-blocking'
+    required: false
+    default: 'true'
+  block_percentage:
+    description: 'Percentage of files with issues required to block (default: 50)'
+    required: false
+    default: '50'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup PDF generation tools
+      if: ${{ inputs.report_format == 'pdf' }}
+      shell: bash
+      run: |
+        echo "Setting up PDF generation tools..."
+        
+        # Check if Node.js is available
+        if command -v node >/dev/null 2>&1; then
+          echo "✅ Node.js is available"
+          node_version=$(node --version)
+          echo "Node.js version: $node_version"
+        else
+          echo "❌ Node.js not found"
+          exit 1
+        fi
+        
+        # Install Go and md2pdf for PDF generation
+        echo "Installing Go and md2pdf for reliable PDF generation..."
+        
+        # Check if Go is already installed
+        if command -v go >/dev/null 2>&1; then
+          echo "✅ Go is already installed: $(go version)"
+        else
+          echo "Installing Go 1.21.3..."
+          # Use a more reliable Go installation method
+          GO_VERSION="1.21.3"
+          GO_ARCHIVE="go${GO_VERSION}.linux-amd64.tar.gz"
+          
+          # Download and install Go
+          curl -fsSL "https://golang.org/dl/${GO_ARCHIVE}" -o "/tmp/${GO_ARCHIVE}"
+          sudo rm -rf /usr/local/go
+          sudo tar -C /usr/local -xzf "/tmp/${GO_ARCHIVE}"
+          rm "/tmp/${GO_ARCHIVE}"
+          
+          # Update PATH
+          export PATH=$PATH:/usr/local/go/bin
+          echo "/usr/local/go/bin" | sudo tee -a /etc/environment
+          
+          # Verify installation
+          if /usr/local/go/bin/go version; then
+            echo "✅ Go installed successfully: $(/usr/local/go/bin/go version)"
+          else
+            echo "❌ Go installation verification failed"
+            exit 1
+          fi
+        fi
+        
+        # Ensure Go is in PATH
+        export PATH=$PATH:/usr/local/go/bin
+        export GOPATH=${GOPATH:-$HOME/go}
+        export PATH=$PATH:$GOPATH/bin
+        
+        # Install md2pdf using go install
+        echo "Installing md2pdf from github.com/solworktech/md2pdf/v2/cmd/md2pdf@latest..."
+        if go install github.com/solworktech/md2pdf/v2/cmd/md2pdf@latest; then
+          echo "✅ md2pdf installed successfully"
+          
+          # Verify installation
+          if command -v md2pdf >/dev/null 2>&1; then
+            echo "✅ md2pdf command available in PATH"
+          elif [ -f "$GOPATH/bin/md2pdf" ]; then
+            echo "✅ md2pdf installed at $GOPATH/bin/md2pdf"
+          elif [ -f "$HOME/go/bin/md2pdf" ]; then
+            echo "✅ md2pdf installed at $HOME/go/bin/md2pdf"
+          else
+            echo "⚠️ md2pdf installed but location not confirmed"
+          fi
+        else
+          echo "❌ Failed to install md2pdf"
+          exit 1
+        fi
+      
+    - name: Run security scan with SSE
+      id: scan
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      run: |
+        chmod +x ./entrypoint.sh
+        ./entrypoint.sh
+      env:
+        API_BASE_URL: ${{ inputs.api_base_url }}
+        REPORT_FORMAT: ${{ inputs.report_format }}
+        TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
+        EXCLUDE_FILES: ${{ inputs.exclude_files }}
+        BLOCKING: ${{ inputs.blocking }}
+        BLOCK_PERCENTAGE: ${{ inputs.block_percentage }}
+      
