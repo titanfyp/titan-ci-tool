@@ -119,4 +119,26 @@ runs:
         EXCLUDE_FILES: ${{ inputs.exclude_files }}
         BLOCKING: ${{ inputs.blocking }}
         BLOCK_PERCENTAGE: ${{ inputs.block_percentage }}
+    
+    - name: Copy reports to workspace root
+      if: always()
+      shell: bash
+      run: |
+        echo "📋 Copying security reports to workspace root for artifact upload..."
+        
+        # Copy from action directory to workspace root
+        if [ -f "${{ github.action_path }}/security_report.pdf" ]; then
+          cp "${{ github.action_path }}/security_report.pdf" "$GITHUB_WORKSPACE/" && \
+            echo "✅ Copied security_report.pdf to workspace root"
+        fi
+        
+        if [ -f "${{ github.action_path }}/security_report.md" ]; then
+          cp "${{ github.action_path }}/security_report.md" "$GITHUB_WORKSPACE/" && \
+            echo "✅ Copied security_report.md to workspace root"
+        fi
+        
+        # Verify files in workspace root
+        echo ""
+        echo "📂 Files in workspace root:"
+        ls -lh "$GITHUB_WORKSPACE"/security_report.* 2>/dev/null || echo "⚠️ No security reports found in workspace root"
       
