@@ -31,50 +31,6 @@ This tool can be published as a reusable GitHub Action. To do so:
 2. Push your repository to GitHub (public or private).
 3. Reference the action in your workflow using the `uses:` syntax.
 
-### Example Workflow Usage
-```yaml
-name: CI Pipeline with Security Scan
-on:
-   push:
-      branches: [ main ]
-   pull_request:
-      branches: [ main ]
-
-jobs:
-   security-scan:
-      runs-on: ubuntu-latest
-      steps:
-         - name: Checkout repository
-            uses: actions/checkout@v4
-
-         - name: Run TITAN Security Scan
-            uses: titan-fyp/titan-ci-tool@<CHOSEN_VERSION>
-            with:
-               api_base_url: ${{ secrets.TITAN_API_BASE_URL }}
-               github_token: ${{ secrets.GH_TOKEN }}
-               report_format: 'pdf'
-               timeout_seconds: 300
-               blocking: true
-               block_percentage: 70
-
-         - name: Security scan summary
-            if: failure()
-            run: |
-               echo "Security scan completed but found vulnerabilities above threshold"
-               echo "Review the security report to identify and fix the issues"
-               echo "Build failed due to security policy enforcement"
-
-         - name: Upload security report
-            if: always()
-            uses: actions/upload-artifact@v4
-            with:
-               name: security-report
-               path: titan-ci-tool/security_report.*
-               retention-days: 30
-```
-
-Replace `<your-org>/<your-repo>` with your actual GitHub organization and repository name.
-
 ### Inputs
 - `api_base_url` (required): URL for the backend API
 - `github_token` (required): GitHub token for repository access. Use `${{ secrets.GH_TOKEN }}` which is automatically provided by GitHub Actions
@@ -139,7 +95,7 @@ Replace `<your-org>/<your-repo>` with your actual GitHub organization and reposi
 
 ```yaml
 - name: Run TITAN Security Scan
-  uses: <your-org>/<your-repo>/titan-ci-tool@main
+  uses: <your-org>/<your-repo>/titan-ci-tool@<VERSION>
   with:
     api_base_url: ${{ secrets.TITAN_API_BASE_URL }}
     github_token: ${{ secrets.GH_TOKEN }}
@@ -159,9 +115,12 @@ Replace `<your-org>/<your-repo>` with your actual GitHub organization and reposi
   uses: actions/upload-artifact@v4
   with:
     name: security-report
-    path: titan-ci-tool/security_report.*
+    path: security_report.*
     retention-days: 30
 ```
+
+- Replace `<your-org>/<your-repo>` with your actual GitHub organization and repository name.
+- Replace `<VERSION>` with the version release from TITAN
 
 The configuration will:
 - Generate a professional PDF report with risk assessment and enhanced timeout protection
