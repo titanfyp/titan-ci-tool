@@ -36,7 +36,6 @@ This tool can be published as a reusable GitHub Action. To do so:
 - `github_token` (required): GitHub token for repository access. Use `${{ secrets.GH_TOKEN }}` which is automatically provided by GitHub Actions
 - `report_format` (optional): The report output format type (md|pdf|xml). Default: md
 - `timeout_seconds` (optional): Timeout to call the API before failing (in seconds). Default: 300
-- `exclude_files` (optional): Comma-separated list of file patterns to exclude from scanning (glob)
 - `blocking` (optional): Whether this step is blocking (fail on issues) or non-blocking. Default: true
 - `block_percentage` (optional): Percentage of files with issues required to block. Default: 50
 
@@ -125,7 +124,6 @@ This tool can be published as a reusable GitHub Action. To do so:
 The configuration will:
 - Generate a professional PDF report with risk assessment and enhanced timeout protection
 - Set a 10-minute timeout for SSE connection with automatic retry handling
-- Exclude common build artifacts and tool directories from scanning
 - **Always generate and upload security reports**, even when builds fail
 - Block the pipeline if 25% or more of files have issues (after generating reports)
 - Provide clear feedback on security policy violations with detailed messaging

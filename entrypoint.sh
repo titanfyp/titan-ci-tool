@@ -602,7 +602,6 @@ $RESULTS_DETAILS
 
 ## 🔍 Scan Configuration
 
-- **Excluded Files**: ${EXCLUDE_FILES:-"None"}
 - **Blocking Mode**: $BLOCKING
 - **Block Percentage Threshold**: $BLOCK_PERCENTAGE%
 - **Timeout**: $TIMEOUT_SECONDS seconds
@@ -654,7 +653,6 @@ $RESULTS_DETAILS
 
 ## Scan Configuration
 
-- **Excluded Files**: ${EXCLUDE_FILES:-"None"}
 - **Blocking Mode**: $BLOCKING
 - **Block Percentage Threshold**: $BLOCK_PERCENTAGE%
 - **Timeout**: $TIMEOUT_SECONDS seconds
@@ -741,7 +739,6 @@ elif [ "$REPORT_FORMAT" == "xml" ]; then
   </metadata>
   
   <configuration>
-    <excludedFiles>${EXCLUDE_FILES:-"None"}</excludedFiles>
     <blockingMode>$BLOCKING</blockingMode>
     <blockPercentageThreshold>$BLOCK_PERCENTAGE</blockPercentageThreshold>
     <timeoutSeconds>$TIMEOUT_SECONDS</timeoutSeconds>

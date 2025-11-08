@@ -16,10 +16,6 @@ inputs:
     description: 'Timeout to call the API before failing (in seconds)'
     required: false
     default: '300'
-  exclude_files:
-    description: 'Comma-separated list of file patterns to exclude from scanning (glob)'
-    required: false
-    default: ''
   blocking:
     description: 'Whether this step is blocking (fail on issues) or non-blocking'
     required: false
@@ -116,7 +112,6 @@ runs:
         GITHUB_TOKEN: ${{ inputs.github_token }}
         REPORT_FORMAT: ${{ inputs.report_format }}
         TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
-        EXCLUDE_FILES: ${{ inputs.exclude_files }}
         BLOCKING: ${{ inputs.blocking }}
         BLOCK_PERCENTAGE: ${{ inputs.block_percentage }}
     
