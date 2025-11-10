@@ -132,6 +132,11 @@ runs:
             echo "✅ Copied security_report.md to workspace root"
         fi
         
+        if [ -f "${{ github.action_path }}/security_report.xml" ]; then
+          cp "${{ github.action_path }}/security_report.xml" "$GITHUB_WORKSPACE/" && \
+            echo "✅ Copied security_report.xml to workspace root"
+        fi
+        
         # Verify files in workspace root
         echo ""
         echo "📂 Files in workspace root:"
