@@ -23,15 +23,7 @@ This tool automates security scanning of your repository using the TITAN API wit
    - Use `${{ secrets.GH_TOKEN }}` which is automatically provided by GitHub Actions with read access to your repository.
    - No manual configuration needed - GitHub Actions provides this token automatically.
 
-## Publishing as a Reusable GitHub Action
-
-This tool can be published as a reusable GitHub Action. To do so:
-
-1. Ensure your repository contains the `titan-ci-tool` folder with `action.yml`, `entrypoint.sh`, and other required files.
-2. Push your repository to GitHub (public or private).
-3. Reference the action in your workflow using the `uses:` syntax.
-
-### Inputs
+## Inputs Required
 - `api_base_url` (required): URL for the backend API
 - `github_token` (required): GitHub token for repository access. Use `${{ secrets.GH_TOKEN }}` which is automatically provided by GitHub Actions
 - `report_format` (optional): The report output format type (md|pdf|xml). Default: md
