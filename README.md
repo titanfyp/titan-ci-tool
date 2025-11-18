@@ -84,39 +84,91 @@ This tool automates security scanning of your repository using the TITAN API wit
 
 ## Example Usage
 
+### Complete Workflow Configuration
+
+Create a file `.github/workflows/security-scan.yml` in your repository with the following content:
+
 ```yaml
-- name: Run TITAN Security Scan
-  uses: titanfyp/titan-ci-tool@<VERSION>
-  with:
-    api_base_url: ${{ secrets.TITAN_API_BASE_URL }}
-    github_token: ${{ secrets.GH_TOKEN }}
-    report_format: 'pdf'
-    timeout_seconds: 600
-    blocking: true
-    block_percentage: 25
+name: TITAN Security Scan
 
-- name: Security scan summary
-  if: failure()
-  run: |
-    echo "Security scan completed but found vulnerabilities above threshold"
-    echo "Review the security report to identify and fix the issues"
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
 
-- name: Upload security report
-  if: always()
-  uses: actions/upload-artifact@v4
-  with:
-    name: security-report
-    path: security_report.*
-    retention-days: 30
+jobs:
+  security-scan:
+    name: Run Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Run TITAN Security Scan
+        uses: titanfyp/titan-ci-tool@<VERSION>
+        with:
+          api_base_url: ${{ secrets.TITAN_API_BASE_URL }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          report_format: 'pdf'
+          timeout_seconds: 600
+          blocking: true
+          block_percentage: 25
+      
+      - name: Security scan summary
+        if: failure()
+        run: |
+          echo "Security scan completed but found vulnerabilities above threshold"
+          echo "Review the security report to identify and fix the issues"
+      
+      - name: Upload security report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-report
+          path: security_report.*
+          retention-days: 30
 ```
 
-Example of repository using the tool: https://github.com/syahmiabbas/vulnerable-rest
+**Configuration Notes:**
+- Replace `<VERSION>` with the version release from TITAN (e.g., `v1.0.0`)
+- Set `TITAN_API_BASE_URL` as a repository secret in GitHub Settings → Secrets and variables → Actions
+- The `GITHUB_TOKEN` is automatically provided by GitHub Actions with read access to your repository
+- The workflow runs on push to main/master/develop branches, pull requests, and can be triggered manually
 
-- Replace `<VERSION>` with the version release from TITAN
+**Example of repository using the tool:** https://github.com/syahmiabbas/vulnerable-rest
 
-The configuration will:
+### What This Configuration Does:
 - Generate a professional PDF report with risk assessment and enhanced timeout protection
 - Set a 10-minute timeout for SSE connection with automatic retry handling
 - **Always generate and upload security reports**, even when builds fail
 - Block the pipeline if 25% or more of files have issues (after generating reports)
 - Provide clear feedback on security policy violations with detailed messaging
+- Upload reports as artifacts for 30 days for review and compliance
+
+### Alternative Configurations
+
+**Non-blocking scan (report only):**
+```yaml
+- name: Run TITAN Security Scan (Non-blocking)
+  uses: titanfyp/titan-ci-tool@<VERSION>
+  with:
+    api_base_url: ${{ secrets.TITAN_API_BASE_URL }}
+    github_token: ${{ secrets.GITHUB_TOKEN }}
+    report_format: 'md'
+    blocking: false
+```
+
+**Strict blocking (fail on any issues):**
+```yaml
+- name: Run TITAN Security Scan (Strict)
+  uses: titanfyp/titan-ci-tool@<VERSION>
+  with:
+    api_base_url: ${{ secrets.TITAN_API_BASE_URL }}
+    github_token: ${{ secrets.GITHUB_TOKEN }}
+    report_format: 'xml'
+    blocking: true
+    block_percentage: 0
+```
